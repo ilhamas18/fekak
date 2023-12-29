@@ -78,11 +78,11 @@ const FormField = (props: OtherProps & FormikProps<FormValues>) => {
           <div className="md:px-14 md:py-8 shadow shadow-lg">
             <div className="relative mb-6 mt-6" data-te-input-wrapper-init>
               <TextInput
-                type="tel"
+                type="text"
                 id="nip"
                 name="nip"
                 label="NIP/NIPPPK"
-                max={18}
+                // max={18}
                 touched={touched.nip}
                 errors={errors.nip}
                 value={values.nip}
@@ -127,9 +127,9 @@ function CreateForm({ handleSubmit }: MyFormProps) {
     }),
     validationSchema: Yup.object().shape({
       nip: Yup.string()
-        .required('Bagian dibutuhkan')
-        .min(18, 'NIP harus 18 angka')
-        .max(18, 'NIP harus 18 angka'),
+        .required('Bagian dibutuhkan'),
+      // .min(18, 'NIP harus 18 angka')
+      // .max(18, 'NIP harus 18 angka'),
       password: Yup.string()
         .required("Bagian dibutuhkan")
         .min(8, "Kata sandi terlalu pendek - minimal harus 8 karakter"),
@@ -184,52 +184,56 @@ const LoginForm: any = () => {
     setLoading(true);
 
     const payload = {
-      nip: values.nip,
-      password: values.password
+      "user": {
+        nip: values.nip,
+        password: values.password
+      }
     }
+    console.log(payload, '<< payload');
 
     const response = await fetchApi({
-      url: "/user/login",
+      url: "/users/sign_in",
       method: "post",
       type: "withoutAuth",
       body: payload
     })
+    console.log(response);
 
-    if (!response.success) {
-      router.push('/auth/login');
-      if (response.code == 404) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'NIP / Email tidak ditemukan',
-        })
-        setLoading(false);
-      } else if (response.code == 400) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Password salah!',
-        })
-        setLoading(false);
-      } else if (response.code == 500) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Koneksi bermasalah',
-        })
-        setLoading(false);
-      }
-      return false
-    } else if (response.success) {
-      setAuthenticated(true);
-      setActive(true);
-      setCookie("refreshSession", response.data.data.access_token, {
-        maxAge: 900000,
-        path: "/",
-      });
-      getProfile();
-      return true;
-    }
+    // if (!response.success) {
+    //   router.push('/users/sign_in');
+    //   if (response.code == 404) {
+    //     Swal.fire({
+    //       icon: 'error',
+    //       title: 'Oops...',
+    //       text: 'NIP / Email tidak ditemukan',
+    //     })
+    //     setLoading(false);
+    //   } else if (response.code == 400) {
+    //     Swal.fire({
+    //       icon: 'error',
+    //       title: 'Oops...',
+    //       text: 'Password salah!',
+    //     })
+    //     setLoading(false);
+    //   } else if (response.code == 500) {
+    //     Swal.fire({
+    //       icon: 'error',
+    //       title: 'Oops...',
+    //       text: 'Koneksi bermasalah',
+    //     })
+    //     setLoading(false);
+    //   }
+    //   return false
+    // } else if (response.success) {
+    //   setAuthenticated(true);
+    //   setActive(true);
+    //   setCookie("refreshSession", response.data.data.access_token, {
+    //     maxAge: 900000,
+    //     path: "/",
+    //   });
+    //   getProfile();
+    //   return true;
+    // }
   }
 
   return (

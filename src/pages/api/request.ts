@@ -115,9 +115,9 @@ export const fetchApi = async ({
       data: body ? JSON.stringify(body) : {},
       headers: header,
     })
-    const { data }: any = response;
+    // const { data }: any = response;
 
-    return data
+    return response;
   } catch (err: any) {
 
     return {
