@@ -32,7 +32,7 @@ const AddOPD = () => {
       <div style={gradientStyle} className='mt-8'>
         <div className='px-4 flex text-white py-4 space-x-6 font-bold items-center'>
           <FaWpforms size={20} />
-          <div className='text-title-xsm'>Form Tambah Data Perangkat Daerah</div>
+          <div className='text-title-xsm'>Form Tambah Data OPD</div>
         </div>
       </div>
       {/* <AddAnggaranSSHForm /> */}

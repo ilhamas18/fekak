@@ -15,6 +15,7 @@ import { fetchApi } from "@/pages/api/request";
 import { useDispatch } from "react-redux";
 import { setProfile } from "@/store/profile/action";
 import { deleteCookie } from "cookies-next";
+import axios from "axios";
 
 interface FormValues {
   nip: string,
@@ -158,12 +159,12 @@ const LoginForm: any = () => {
     const token = getCookie("refreshSession");
     if (typeof token !== "undefined") {
       const resUser = await fetchApi({
-        url: "/user/getProfile",
+        url: "/api/v1/users/1/profiles",
         method: "get",
         type: "auth"
       })
 
-      if (!resUser.success) {
+      if (resUser.status != 200) {
         deleteCookie("refreshSession");
         Swal.fire({
           icon: 'error',
@@ -171,8 +172,7 @@ const LoginForm: any = () => {
           text: 'Koneksi bermasalah!',
         })
       } else {
-        const { data } = resUser.data;
-        dispatch(setProfile(data));
+        dispatch(setProfile(resUser.data));
         router.push('/');
       }
     } else {
@@ -184,12 +184,11 @@ const LoginForm: any = () => {
     setLoading(true);
 
     const payload = {
-      "user": {
+      user: {
         nip: values.nip,
         password: values.password
       }
     }
-    console.log(payload, '<< payload');
 
     const response = await fetchApi({
       url: "/users/sign_in",
@@ -197,43 +196,35 @@ const LoginForm: any = () => {
       type: "withoutAuth",
       body: payload
     })
-    console.log(response);
 
-    // if (!response.success) {
-    //   router.push('/users/sign_in');
-    //   if (response.code == 404) {
-    //     Swal.fire({
-    //       icon: 'error',
-    //       title: 'Oops...',
-    //       text: 'NIP / Email tidak ditemukan',
-    //     })
-    //     setLoading(false);
-    //   } else if (response.code == 400) {
-    //     Swal.fire({
-    //       icon: 'error',
-    //       title: 'Oops...',
-    //       text: 'Password salah!',
-    //     })
-    //     setLoading(false);
-    //   } else if (response.code == 500) {
-    //     Swal.fire({
-    //       icon: 'error',
-    //       title: 'Oops...',
-    //       text: 'Koneksi bermasalah',
-    //     })
-    //     setLoading(false);
-    //   }
-    //   return false
-    // } else if (response.success) {
-    //   setAuthenticated(true);
-    //   setActive(true);
-    //   setCookie("refreshSession", response.data.data.access_token, {
-    //     maxAge: 900000,
-    //     path: "/",
-    //   });
-    //   getProfile();
-    //   return true;
-    // }
+    if (response.status == 200) {
+      setAuthenticated(true);
+      setActive(true);
+      setCookie("refreshSession", response.headers.authorization.split(' ')[1], {
+        maxAge: 900000,
+        path: "/",
+      });
+      getProfile();
+      return true;
+    } else {
+      router.push('/auth/login');
+      if (response.status != 401) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'NIP / Email tidak ditemukan',
+        })
+        setLoading(false);
+      } else if (response.code == 500) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Koneksi bermasalah',
+        })
+        setLoading(false);
+      }
+      return false
+    }
   }
 
   return (

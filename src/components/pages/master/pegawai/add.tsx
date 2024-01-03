@@ -25,6 +25,7 @@ interface FormValues {
 interface OtherProps {
   title?: string;
   ref?: any;
+  listOpd?: any;
   loading?: boolean;
 }
 
@@ -47,6 +48,7 @@ const FormField = (props: OtherProps & FormikProps<FormValues>) => {
     isValid,
     dirty,
     ref,
+    listOpd,
     loading
   } = props;
   const router = useRouter();
@@ -54,6 +56,28 @@ const FormField = (props: OtherProps & FormikProps<FormValues>) => {
   return (
     <div className="form-container relative bg-white">
       <div className="form-wrapper-general">
+        <div className="px-8 flex flex-col gap-2 space-y-4 pt-6 pb-2">
+          <div className="relative flex w-full items-center">
+            <div className="text-title-xsm2 w-[12%] lg:block hidden">OPD</div>
+            <div className="w-[3%] lg:block hidden">:</div>
+            <div className="lg:w-[85%] w-full">
+              <TextInput
+                type="dropdown"
+                id="opd"
+                name="opd"
+                label="Perangkat Daerah"
+                value={values.kodeOPD}
+                placeholder="Perangkat Daerah"
+                options={listOpd}
+                change={(selectedOption: any) => {
+                  handleChange({
+                    target: { name: 'kodeOPD', value: selectedOption.value }
+                  })
+                }}
+              />
+            </div>
+          </div>
+        </div>
         <div className="px-8 flex flex-col gap-2 space-y-4 pt-6 pb-2">
           <div className="relative flex w-full items-center">
             <div className="text-title-xsm2 w-[12%] lg:block hidden">NIP</div>
@@ -174,29 +198,59 @@ function CreateForm({ handleSubmit, ...otherProps }: MyFormProps) {
   return <FormWithFormik {...otherProps} />
 }
 
-const AddPegawaiForm: React.FC = () => {
+interface PropTypes {
+  listOpd: any
+}
+
+const AddPegawaiForm = ({ listOpd }: PropTypes) => {
+  const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleSubmit = async (values: FormValues) => {
-    // setLoading(true);
+    setLoading(true);
     const payload = {
-      nip: values.nip,
-      email: values.email,
-      password: values.password
+      user: {
+        nip: values.nip,
+        email: values.email,
+        password: values.password
+      }
     }
-    console.log(payload);
 
-    // const response = await axios({
-    //   url: 'http://localhost:3000/api/users',
-    //   method: 'post',
-    //   data: payload
-    // })
-    // console.log(response, '???');
+    const response = await fetchApi({
+      url: '/users',
+      method: 'post',
+      type: 'auth',
+      body: payload
+    })
 
+    if (response.status == 201) {
+      Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Berhasil menambahkan User",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      router.push('/');
+    } else if (response.status == 422) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "NIP / Email telah terdaftar",
+      });
+      setLoading(false);
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Koneksi bermasalah!",
+      });
+      setLoading(false);
+    }
   }
 
   return (
-    <CreateForm handleSubmit={handleSubmit} loading={loading} />
+    <CreateForm handleSubmit={handleSubmit} listOpd={listOpd} loading={loading} />
   )
 }
 

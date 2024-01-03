@@ -418,7 +418,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               <Link
                                 href="/master/tematik"
                                 className={`first-letter:group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white
-                                  ${pathname === "/master/tematik" && "text-white bg-graydark py-1"}`}
+                                  ${pathname?.includes('/master/tematik') && "text-white bg-graydark py-1"}`}
                               >Tematik</Link>
                             </li>
                             <li>
@@ -525,7 +525,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             <Link
                               href="/rencana-kota/tematik"
                               className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white
-                              ${pathname === '/rencana-kota/tematik' && 'text-white bg-graydark py-1'}`}
+                              ${pathname?.includes('/rencana-kota/tematik') && 'text-white bg-graydark py-1'}`}
                             >
                               Tematik
                             </Link>

@@ -7,24 +7,45 @@ import Breadcrumb from '@/components/global/Breadcrumbs/Breadcrumb';
 import { FaWpforms } from "react-icons/fa";
 import AddPegawaiForm from '@/components/pages/master/pegawai/add';
 import { fetchApi } from '@/pages/api/request';
-import axios from 'axios';
+import Swal from "sweetalert2";
+import { shallowEqual, useSelector } from 'react-redux';
+import { State } from '@/store/reducer';
 
 const TambahPegawai = ({ params }: { params: { role: string } }) => {
   const { role } = params;
+  const [listOpd, setListOPD] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    getDataOPD();
-  }, []);
+    getOpd();
+  }, [])
 
-  const getDataOPD = async () => {
+  const getOpd = async () => {
     setLoading(true);
-    const response = await axios({
-      url: 'http://localhost:3000/api/v1/opds.json',
-      method: 'get'
+    const response = await fetchApi({
+      url: '/api/v1/opds',
+      method: 'get',
+      type: 'auth'
     })
-    console.log(response, '????');
 
+    if (response.status == 200) {
+      let temp: any = [];
+      response.data.forEach((el: any) => {
+        temp.push({
+          label: el.nama_opd,
+          value: el.kode_opd
+        })
+      })
+      setListOPD(temp);
+      setLoading(false);
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Koneksi bermasalah',
+      })
+      setLoading(false);
+    }
   }
 
   const gradientStyle = {
@@ -41,7 +62,7 @@ const TambahPegawai = ({ params }: { params: { role: string } }) => {
           <div className='text-title-xsm'>Form Tambah {role.toUpperCase()}</div>
         </div>
       </div>
-      <AddPegawaiForm />
+      <AddPegawaiForm listOpd={listOpd} />
     </div>
   )
 }

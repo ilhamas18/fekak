@@ -12,7 +12,6 @@ import Swal from "sweetalert2";
 import { fetchApi } from "@/pages/api/request";
 import { useSelector } from "react-redux";
 import { State } from "@/store/reducer";
-import years from "@/components/helpers/year";
 
 const Header = (props: {
   sidebarOpen: string | boolean | undefined;
@@ -27,6 +26,7 @@ const Header = (props: {
 
   const dispatch = useDispatch();
   const [listOPD, setListOPD] = useState<any>([]);
+  const [years, setYears] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -36,106 +36,86 @@ const Header = (props: {
   const getProfile = async () => {
     const token = getCookie("refreshSession");
     if (typeof token !== "undefined") {
-      const resUser = await fetchApi({
-        url: "/user/getProfile",
-        method: "get",
-        type: "auth"
-      })
-
-      if (!resUser.success) {
-        deleteCookie("refreshSession");
-      } else {
-        const { data } = resUser.data;
-        let hasAdminRole = data.role.some((role: any) => role.nama_role === "Admin Kota");
-
-        if (hasAdminRole) getAllOPD();
-        else getUser(data);
-      }
       props.setAuthenticated(true)
+      getAllOPD();
+      getAllYear();
     } else {
       props.setAuthenticated(false)
     }
-  }
+    // if (typeof token !== "undefined") {
+    //   const resUser = await fetchApi({
+    //     url: "/api/v1/users/1/profiles",
+    //     method: "get",
+    //     type: "auth"
+    //   })
 
-  const getUser = async (data: any) => {
-    setLoading(true);
-    const response = await fetchApi({
-      url: `/user/getUser/${data.nip}`,
-      method: "get",
-      type: "auth"
-    })
+    //   if (!resUser.success) {
+    //     deleteCookie("refreshSession");
+    //   } else {
+    //     const { data } = resUser.data;
+    //     let hasAdminRole = data.role.some((role: any) => role.nama_role === "Admin Kota");
 
-    if (response.success) {
-      const { data } = response.data;
-
-      geOneOPD(data.kode_sub_unit);
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Gagal memuat data profil',
-      })
-    }
+    //     if (hasAdminRole) getAllOPD();
+    //     else getUser(data);
+    //   }
+    //   props.setAuthenticated(true)
+    // } else {
+    //   props.setAuthenticated(false)
+    // }
   }
 
   const getAllOPD = async () => {
     setLoading(true);
     const response = await fetchApi({
-      url: '/opd/getAllOPD',
+      url: '/api/v1/opds',
       method: 'get',
       type: 'auth'
     })
 
-    if (!response.success) {
-      if (response.data.code == 500) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Koneksi bermasalah!',
-        })
-      }
-      setLoading(false);
-    } else {
-      const { data } = response.data;
+    if (response.status == 200) {
       let temp: any = [];
-      data.forEach((el: any) => {
+      response.data.forEach((el: any) => {
         temp.push({
-          label: el.nama_sub_unit,
-          value: el.kode_sub_unit
+          label: el.nama_opd,
+          value: el.kode_opd
         })
       })
       setListOPD(temp);
       setLoading(false);
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Koneksi bermasalah',
+      })
+      setLoading(false);
     }
   }
 
-  const geOneOPD = async (kode_opd: string) => {
+  const getAllYear = async () => {
     setLoading(true);
     const response = await fetchApi({
-      url: `/opd/getOneUrusanOPD/${kode_opd}`,
+      url: '/api/v1/tahuns',
       method: 'get',
       type: 'auth'
     })
 
-    if (!response.success) {
+    if (response.status == 200) {
+      let temp: any = [];
+      response.data.forEach((el: any) => {
+        temp.push({
+          label: el.tahun,
+          value: el.id
+        })
+      })
+      setYears(temp);
+      setLoading(false);
+    } else {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: 'Koneksi bermasalah!',
+        text: 'Koneksi bermasalah',
       })
-      setLoading(false);
-    } else {
-      const { data } = response.data;
-      let temp: any = [];
-      data.forEach((el: any) => {
-        temp.push({
-          label: el.nama_sub_unit,
-          value: el.kode_sub_unit,
-          urusan: el.Urusans
-        })
-      })
-
-      dispatch(setStoreKodeOPD(temp));
       setLoading(false);
     }
   }

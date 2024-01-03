@@ -13,6 +13,15 @@ import { BiSolidAddToQueue } from 'react-icons/bi';
 import withAuth from '@/components/utils/withAuth';
 import { BiSearch } from 'react-icons/bi';
 import Loading from '@/components/global/Loading/loading';
+import Stack from '@mui/material/Stack';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
+
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref,
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const DataTematikKota = dynamic(() => import('@/components/pages/rencana-kota/tematik/list'), {
   ssr: false,
@@ -37,22 +46,21 @@ const TematikKota: React.FC = () => {
   const getTematik = async () => {
     setLoading(true);
     const response = await fetchApi({
-      url: `/tematik/getAllTematik/${storeYear.value}`,
+      url: `/api/v1/tematiks`,
       method: 'get',
       type: 'auth'
     })
 
-    if (!response.success) {
+    if (response.status == 200) {
+      setDataTematik(response.data);
+      setLoading(false);
+    } else {
       setLoading(false);
       Swal.fire({
         icon: "error",
         title: "Oops...",
         text: "Koneksi bermasalah!",
       });
-    } else {
-      const { data } = response.data;
-      setDataTematik(data);
-      setLoading(false);
     }
   }
 
@@ -74,12 +82,12 @@ const TematikKota: React.FC = () => {
       ) {
         return true;
       }
-      const hasMatchingIndikator = item.indikator.some((indikator: any) =>
-        Object.values(indikator).some((value: any) =>
-          typeof value === 'string' && value.toLowerCase().includes(keyword)
-        )
-      );
-      return hasMatchingIndikator;
+      // const hasMatchingIndikator = item.indikator.some((indikator: any) =>
+      //   Object.values(indikator).some((value: any) =>
+      //     typeof value === 'string' && value.toLowerCase().includes(keyword)
+      //   )
+      // );
+      // return hasMatchingIndikator;
     });
 
     setFilteredData(filteredResults);
@@ -94,42 +102,48 @@ const TematikKota: React.FC = () => {
       {loading ? (
         <Loading loading={loading} setLoading={setLoading} />
       ) : (
-        <>
-          <div className="bg-white dark:bg-meta-4 dark:text-white shadow-card flex flex-col gap-2 py-6 text-center font-bold text-title-sm rounded rounded-lg border-none">
-            <div>Data Tematik Kota</div>
-          </div>
-          <div className='body relative'>
-            <div className='flex justify-between items-center mt-10'>
-              <div className='flex'>
-                <button
-                  className='bg-xl-base px-4 py-1 text-white rounded rounded-md hover:shadow-lg'
-                  onClick={handleAddTematik}
-                >
-                  Tambah Tematik
-                </button>
-              </div>
-              <div className='flex gap-3 bg-white items-center border border-light-gray rounded-3xl p-2 mb-3'>
-                <BiSearch size={22} className='text-deep-gray' />
-                <input
-                  type="text"
-                  id="search"
-                  name="search"
-                  value={searchQuery}
-                  placeholder='Search . . .'
-                  onChange={handleSearch}
-                  className='focus:outline-none w-full outline-none text-Axiata-Book'
-                />
-              </div>
+        storeYear.length != 0 ? (
+          <>
+            <div className="bg-white dark:bg-meta-4 dark:text-white shadow-card flex flex-col gap-2 py-6 text-center font-bold text-title-sm rounded rounded-lg border-none">
+              <div>Data Tematik Kota</div>
             </div>
-            <div style={gradientStyle}>
-              <div className='px-4 flex text-white py-4 space-x-6 font-bold items-center'>
-                <SiMicrostrategy size={20} />
-                <div className='text-title-xsm'>Tematik Kota</div>
+            <div className='body relative'>
+              <div className='flex justify-between items-center mt-10'>
+                <div className='flex'>
+                  <button
+                    className='bg-xl-base px-4 py-1 text-white rounded rounded-md hover:shadow-lg'
+                    onClick={handleAddTematik}
+                  >
+                    Tambah Tematik
+                  </button>
+                </div>
+                <div className='flex gap-3 bg-white items-center border border-light-gray rounded-3xl p-2 mb-3'>
+                  <BiSearch size={22} className='text-deep-gray' />
+                  <input
+                    type="text"
+                    id="search"
+                    name="search"
+                    value={searchQuery}
+                    placeholder='Search . . .'
+                    onChange={handleSearch}
+                    className='focus:outline-none w-full outline-none text-Axiata-Book'
+                  />
+                </div>
               </div>
+              <div style={gradientStyle}>
+                <div className='px-4 flex text-white py-4 space-x-6 font-bold items-center'>
+                  <SiMicrostrategy size={20} />
+                  <div className='text-title-xsm'>Tematik Kota</div>
+                </div>
+              </div>
+              <DataTematikKota data={displayedData} getTematik={getTematik} setLoading={setLoading} />
             </div>
-            <DataTematikKota data={displayedData} getTematik={getTematik} setLoading={setLoading} />
-          </div>
-        </>
+          </>
+        ) : (
+          <Stack spacing={2} sx={{ width: '100%' }}>
+            <Alert severity="warning">Silakan Tahun terlebih dahulu !</Alert>
+          </Stack>
+        )
       )}
     </div>
   )

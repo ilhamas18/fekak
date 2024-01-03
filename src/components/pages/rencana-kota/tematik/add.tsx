@@ -283,47 +283,36 @@ function CreateForm({ handleSubmit, ...otherProps }: MyFormProps) {
   return <FormWithFormik {...otherProps} />
 }
 
-const AddTematikForm: any = () => {
+interface PropTypes {
+  year: any;
+}
+
+const AddTematikForm: any = ({ year }: PropTypes) => {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
-
-  const { storeYear } = useSelector((state: State) => ({
-    storeYear: state.filter.storeYear
-  }), shallowEqual);
+  console.log(year, 'year');
 
   const handleSubmit = async (values: FormValues) => {
     setLoading(true);
     const payload = {
-      tematik: values.tematik,
-      indikator: values.indikator,
-      keterangan: values.keterangan,
-      tahun: storeYear.value
+      tematik: {
+        tematik: values.tematik,
+        // indikator: values.indikator,
+        keterangan: values.keterangan,
+        tahun_id: year.value,
+        level: 0,
+        parent_id: ""
+      }
     }
 
     const response = await fetchApi({
-      url: '/tematik/addTematik',
+      url: '/api/v1/tematiks',
       method: 'post',
       type: 'auth',
       body: payload
     })
 
-    if (!response.success) {
-      if (response.data.code == 400) {
-        setLoading(false);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Periksa kembali data Tematik!",
-        });
-      } else if (response.data.code == 500) {
-        setLoading(false);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Koneksi bermasalah!",
-        });
-      }
-    } else {
+    if (response.status == 201) {
       Swal.fire({
         position: "center",
         icon: "success",
@@ -332,6 +321,20 @@ const AddTematikForm: any = () => {
         timer: 1500,
       });
       router.push("/rencana-kota/tematik");
+    } else if (response.status == 422) {
+      setLoading(false);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Periksa kembali data Tematik!",
+      });
+    } else {
+      setLoading(false);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Koneksi bermasalah!",
+      });
     }
   }
 

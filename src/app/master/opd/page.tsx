@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Breadcrumb from '@/components/global/Breadcrumbs/Breadcrumb';
 import { fetchApi } from '@/pages/api/request';
 import Swal from 'sweetalert2';
+import dynamic from 'next/dynamic';
 import { shallowEqual, useSelector } from 'react-redux';
 import { State } from '@/store/reducer';
 import { HiBuildingOffice2 } from "react-icons/hi2";
@@ -14,33 +15,56 @@ import withAuth from '@/components/utils/withAuth';
 import DataMusrenbang from '@/components/pages/master/master-usulan/musrenbang/list';
 import { BiSearch } from 'react-icons/bi';
 import Loading from '@/components/global/Loading/loading';
-import DataOPD from '@/components/pages/master/opd/list';
+
+const DataOPD = dynamic(() => import('@/components/pages/master/opd/list'), {
+  ssr: false,
+  loading: () => <Loading />
+});
 
 const OPD = () => {
   const router = useRouter();
   const [dataOPD, setDataOPD] = useState<any>([]);
-  const [search, setSearch] = useState<string>('');
+  const [filteredData, setFilteredData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [loading, setLoading] = useState<any>([]);
 
   useEffect(() => {
-    fetchDataOPD();
+    getOpd();
   }, []);
 
-  const fetchDataOPD = () => {
-    let temp: any = [
-      {
-        id: 1,
-        kl: 'Kota Madiun',
-        kode_opd: '1.01.0.00.0.00.01.0000',
-        nama_opd: 'Dinas Pendidikan',
-        opd: 'Dinas Pendidikan',
-        urusan: '(1) URUSAN PEMERINTAHAN WAJIB YANG BERKAITAN DENGAN PELAYANAN DASAR',
-        bidang_urusan: '(1.01) URUSAN PEMERINTAHAN BIDANG PENDIDIKAN',
-        kepala_opd: 'LISMAWATI (196801041994032008)',
-        pangkat: 'Pembina Utama Muda'
-      },
-    ]
-    setDataOPD(temp);
+  const getOpd = async () => {
+    setLoading(true);
+    const response = await fetchApi({
+      url: '/api/v1/opds',
+      method: 'get',
+      type: 'auth'
+    })
+
+    if (response.status == 200) {
+      setDataOPD(response.data);
+    } else {
+      setLoading(false);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Koneksi bermasalah!",
+      });
+    }
   }
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const keyword = e.target.value.toLowerCase();
+    setSearchQuery(keyword);
+
+    const filteredResults = dataOPD.filter((item: any) =>
+      Object.values(item).some((value: any) =>
+        typeof value === 'string' && value.toLowerCase().includes(keyword)
+      ))
+
+    setFilteredData(filteredResults);
+  }
+
+  const displayedData = searchQuery ? filteredData : dataOPD;
 
   const gradientStyle = {
     width: '100%',
@@ -55,6 +79,7 @@ const OPD = () => {
 
       <div className="bg-white dark:bg-meta-4 dark:text-white shadow-card flex flex-col gap-2 py-6 text-center font-bold text-title-sm rounded rounded-lg border-none">
         <div>Daftar Satuan Kerja Perangkat Daerah</div>
+        <div>Kabupaten Madiun</div>
       </div>
       <div className='body relative'>
         <div className='flex justify-between items-center mt-10'>
@@ -72,9 +97,9 @@ const OPD = () => {
               type="text"
               id="search"
               name="search"
-              value={search}
+              value={searchQuery}
               placeholder='Search . . .'
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={handleSearch}
               className='focus:outline-none w-full outline-none text-Axiata-Book' />
           </div>
         </div>
@@ -84,7 +109,7 @@ const OPD = () => {
             <div className='text-title-xsm'>Perangkat Daerah</div>
           </div>
         </div>
-        <DataOPD data={dataOPD} />
+        <DataOPD data={displayedData} />
       </div>
     </div>
   )

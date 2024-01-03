@@ -124,7 +124,7 @@ const FormField = (props: OtherProps & FormikProps<FormValues>) => {
             <div className="text-title-xsm2">Tambah Indikator</div>
           </button>
         </div>
-        <div className="flex flex-col gap-2 border-t-6 border-light-gray">
+        {/* <div className="flex flex-col gap-2 border-t-6 border-light-gray">
           {values.indikator.length != 0 && values.indikator.map((el: any, i: number) => (
             <div key={i} className="shadow-xl py-6 border border-[#cbd5e1] w-full px-8 flex flex-col gap-4 mt-6">
               <div className="relative flex w-full items-center">
@@ -226,8 +226,8 @@ const FormField = (props: OtherProps & FormikProps<FormValues>) => {
               </button>
             </div>
           ))}
-        </div>
-        <div className="flex w-full justify-between mt-10 mb-4 pb-4">
+        </div> */}
+        <div className="flex w-full justify-between mt-10 mb-4 pb-4 px-8">
           <div>
             <Button
               type="secondary"
@@ -248,7 +248,7 @@ const FormField = (props: OtherProps & FormikProps<FormValues>) => {
               className="button-container px-10"
               rounded
               loading={loading}
-              disabled={values.indikator.length == 0 ? true : false}
+              // disabled={values.indikator.length == 0 ? true : false}
               onClick={handleSubmit}
             >
               <div className="flex justify-center items-center text-white font-Nunito">
@@ -308,47 +308,47 @@ const EditTematikForm: any = () => {
 
   const handleSubmit = async (values: FormValues) => {
     setLoading(true);
-
     const payload = {
-      tematik: values.tematik,
-      indikator: values.indikator,
-      idIndikator: values.deletedIndikator,
-      keterangan: values.keterangan
+      tematik: {
+        tematik: values.tematik,
+        // indikator: values.indikator,
+        keterangan: values.keterangan,
+        tahun_id: storePayload.tahun_id,
+        level: 0,
+        parent_id: ""
+      }
     }
 
     const response = await fetchApi({
-      url: `/tematik/editTematik/${storePayload.id}`,
+      url: `/api/v1/tematiks/${storePayload.id}`,
       method: 'put',
       type: 'auth',
       body: payload
     })
 
-    if (!response.success) {
-      if (response.data.code == 400) {
-        setLoading(false);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Periksa kembali data Tematik!",
-        });
-      } else if (response.data.code == 500) {
-        setLoading(false);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Koneksi bermasalah!",
-        });
-      }
-    } else {
+    if (response.status == 200) {
       Swal.fire({
         position: "center",
         icon: "success",
-        title: "Berhasil update Tematik Kota",
+        title: "Berhasil Edit Tematik",
         showConfirmButton: false,
         timer: 1500,
       });
       router.push("/rencana-kota/tematik");
-      dispatch(setStorePayload([]));
+    } else if (response.status == 422) {
+      setLoading(false);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Periksa kembali data Tematik!",
+      });
+    } else {
+      setLoading(false);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Koneksi bermasalah!",
+      });
     }
   }
 

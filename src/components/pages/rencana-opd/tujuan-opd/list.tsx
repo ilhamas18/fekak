@@ -1,9 +1,4 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
-import DataTable from '@/components/common/table/dataTable';
-import { BiEdit } from 'react-icons/bi';
-import { RiDeleteBin6Fill } from 'react-icons/ri';
-import { BsFillTrashFill } from 'react-icons/bs';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -21,7 +16,6 @@ interface PropTypes {
 const DataTujuanOPD = ({ data }: PropTypes) => {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  console.log(data);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -36,7 +30,6 @@ const DataTujuanOPD = ({ data }: PropTypes) => {
     e.preventDefault()
     console.log(id)
   }
-  console.log(data);
 
   return (
     <div className='bg-white dark:bg-meta-4 dark:text-white'>

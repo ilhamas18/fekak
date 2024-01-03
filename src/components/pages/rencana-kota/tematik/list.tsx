@@ -36,59 +36,74 @@ const DataTematikKota = ({ data, getTematik, setLoading }: PropTypes) => {
     setPage(0);
   };
 
-  const handleEditTematik = (id: number) => {
-    dispatch(setStorePayload(data[id]));
-    router.push(`/rencana-kota/tematik/edit`);
+  const handleEditTematik = async (id: number) => {
+    setLoading(true);
+    const response = await fetchApi({
+      url: `/api/v1/tematiks/${id}`,
+      method: 'get',
+      type: 'auth'
+    })
+
+    if (response.status == 200) {
+      dispatch(setStorePayload(response.data));
+      router.push(`/rencana-kota/tematik/edit`);
+    } else {
+      setLoading(false);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Koneksi bermasalah!",
+      });
+    }
   }
 
-  const deleteConfirm = (id: number) => {
+  const deleteConfirm = (id: number, name: string) => {
     Swal.fire({
-      title: "Yakin hapus tematik ?",
+      title: `Yakin hapus tematik "${name}" ?`,
       showDenyButton: true,
       showCancelButton: true,
       confirmButtonText: "Hapus",
       denyButtonText: `Batal`
     }).then((result) => {
       if (result.isConfirmed) {
-        handleDeleteTematik(id)
+        handleDeleteTematik(id, name)
       }
     });
   }
 
-  const handleDeleteTematik = async (id: number) => {
+  const handleDeleteTematik = async (id: number, name: string) => {
     setLoading(true);
     const response = await fetchApi({
-      url: `/tematik/deleteTematik/${id}`,
+      url: `/api/v1/tematiks/${id}`,
       method: 'delete',
       type: 'auth'
     })
+    console.log(response);
 
-    if (!response.success) {
-      if (response.code == 404) {
-        setLoading(false);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Id Tematik tidak ditemukan",
-        });
-      } else {
-        setLoading(false);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Koneksi bermasalah!",
-        });
-      }
-    } else {
+    if (response.status == 200) {
       Swal.fire({
         position: "center",
         icon: "success",
-        title: "Berhasil hapus Tematik Kota",
+        title: `Berhasil hapus Tematik "${name}"`,
         showConfirmButton: false,
         timer: 1500,
       });
       getTematik();
       setLoading(false);
+    } else if (response.status == 404) {
+      setLoading(false);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Data tematik tidak ditemukan",
+      });
+    } else {
+      setLoading(false);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Koneksi bermasalah!",
+      });
     }
   }
 
@@ -113,37 +128,38 @@ const DataTematikKota = ({ data, getTematik, setLoading }: PropTypes) => {
             <TableBody>
               {data
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .sort((a: any, b: any) => b.id - a.id)
                 .map((row: any, index: number) => {
                   return (
                     <React.Fragment>
                       <TableRow hover role="checkbox" tabIndex={-1} key={index}>
-                        <TableCell align='center' rowSpan={row.indikator.length + 1}>{index + 1}</TableCell>
-                        <TableCell align='center' rowSpan={row.indikator.length + 1}>
+                        <TableCell align='center'>{index + 1}</TableCell>
+                        <TableCell align='center'>
                           <div className='flex gap-3 items-center justify-center'>
                             <button
                               className='bg-warning text-white p-2 rounded-md hover:cursor-pointer'
-                              onClick={() => handleEditTematik(index)}
+                              onClick={() => handleEditTematik(row.id)}
                             >
                               <BiEdit size={20} />
                             </button>
                             <button
                               className='bg-danger text-white p-2 rounded-md hover:cursor-pointer'
-                              onClick={() => deleteConfirm(row.id)}
+                              onClick={() => deleteConfirm(row.id, row.tematik)}
                             >
                               <BsFillTrashFill size={20} />
                             </button>
                           </div>
                         </TableCell>
-                        <TableCell align='center' rowSpan={row.indikator.length + 1}>{row.tematik}</TableCell>
-                        <TableCell align='center' rowSpan={row.indikator.length + 1}>{row.keterangan}</TableCell>
+                        <TableCell align='center'>{row.tematik}</TableCell>
+                        <TableCell align='center'>{row.keterangan}</TableCell>
                       </TableRow>
-                      {row.indikator.map((el: any, i: number) => (
+                      {/* {row.indikator.map((el: any, i: number) => (
                         <TableRow hover role="checkbox" key={i}>
                           <TableCell align='center'>{el.indikator}</TableCell>
                           <TableCell align='center'>{el.target}</TableCell>
                           <TableCell align='center'>{el.satuan}</TableCell>
                         </TableRow>
-                      ))}
+                      ))} */}
                     </React.Fragment>
                   );
                 })}

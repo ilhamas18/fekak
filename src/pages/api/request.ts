@@ -120,12 +120,12 @@ export const fetchApi = async ({
     return response;
   } catch (err: any) {
 
-    return {
-      success: err?.response?.data?.success ? err.response.data.success : false,
-      code: err?.response?.status ? err.response.status : 500,
-      data: err
-    }
+    // return {
+    //   success: err?.response?.data?.success ? err.response.data.success : false,
+    //   code: err?.response?.status ? err.response.status : 500,
+    //   data: err
+    // }
 
-    // return err
+    return err.response
   }
 }
