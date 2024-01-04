@@ -5,7 +5,6 @@ import { useRouter, usePathname } from "next/navigation";
 import TextInput from '@/components/common/text-input/input';
 import { Button } from '@/components/common/button/button';
 import Swal from 'sweetalert2'
-import Image from "next/image";
 import { useAuth } from "@/components/providers/Auth";
 import Loading from "@/components/global/Loading/loading";
 import { withFormik, FormikProps, FormikBag } from 'formik';
@@ -15,7 +14,6 @@ import { fetchApi } from "@/pages/api/request";
 import { useDispatch } from "react-redux";
 import { setProfile } from "@/store/profile/action";
 import { deleteCookie } from "cookies-next";
-import axios from "axios";
 
 interface FormValues {
   nip: string,
@@ -72,7 +70,7 @@ const FormField = (props: OtherProps & FormikProps<FormValues>) => {
             </div>
             <div
               className="flex flex-row items-center justify-center lg:justify-start">
-              <p className="mb-0 mr-4 text-lg font-bold text-white">Halaman Login e-KAK</p>
+              <p className="mb-0 mr-4 text-lg font-bold text-white">KERANGKA ACUAN KERJA KABUPATEN MADIUN</p>
             </div>
           </div>
 
@@ -208,14 +206,14 @@ const LoginForm: any = () => {
       return true;
     } else {
       router.push('/auth/login');
-      if (response.status != 401) {
+      if (response.status == 401) {
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
           text: 'NIP / Email tidak ditemukan',
         })
         setLoading(false);
-      } else if (response.code == 500) {
+      } else if (response.status == 500) {
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
