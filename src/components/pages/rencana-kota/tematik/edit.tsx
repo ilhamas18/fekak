@@ -1,19 +1,19 @@
-'use client';
+"use client";
 import React from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { setStorePayload } from "@/store/payload/action";
-import TextInput from '@/components/common/text-input/input';
-import { Button } from '@/components/common/button/button';
-import Swal from 'sweetalert2'
+import TextInput from "@/components/common/text-input/input";
+import { Button } from "@/components/common/button/button";
+import Swal from "sweetalert2";
 import Loading from "@/components/global/Loading/loading";
-import { withFormik, FormikProps, FormikBag } from 'formik';
-import * as Yup from 'yup';
+import { withFormik, FormikProps, FormikBag } from "formik";
+import * as Yup from "yup";
 import { shallowEqual, useSelector } from "react-redux";
 import { State } from "@/store/reducer";
 import { fetchApi } from "@/pages/api/request";
-import Select from 'react-select';
+import Select from "react-select";
 import { IoIosAddCircle } from "react-icons/io";
 import XAddIndikatorTematik from "./x-modal/XAddIndikator";
 
@@ -34,7 +34,7 @@ interface OtherProps {
 interface MyFormProps extends OtherProps {
   handleSubmit: (
     values: FormValues,
-    formikBag: FormikBag<object, FormValues>
+    formikBag: FormikBag<object, FormValues>,
   ) => void;
 }
 
@@ -50,7 +50,7 @@ const FormField = (props: OtherProps & FormikProps<FormValues>) => {
     isValid,
     dirty,
     ref,
-    loading
+    loading,
   } = props;
   const router = useRouter();
   const [openAddIndikator, setOpenAddIndikator] = useState<boolean>(false);
@@ -58,7 +58,7 @@ const FormField = (props: OtherProps & FormikProps<FormValues>) => {
   const handleDeleteIndikator = (e: any, indikator: string, id: number) => {
     e.preventDefault();
     const newArray = values.indikator.filter(
-      (item: any) => item.indikator !== indikator
+      (item: any) => item.indikator !== indikator,
     );
     handleChange({
       target: { name: "indikator", value: newArray },
@@ -70,16 +70,18 @@ const FormField = (props: OtherProps & FormikProps<FormValues>) => {
     handleChange({
       target: { name: "deletedIndikator", value: tempId },
     });
-  }
+  };
 
-  const handleBack = () => router.push('/rencana-kota/tematik');
+  const handleBack = () => router.push("/rencana-kota/tematik");
 
   return (
     <div className="form-container relative bg-white">
       <div className="form-wrapper-general">
         <div className="px-8 flex flex-col gap-2 space-y-4 pt-6 pb-2">
           <div className="relative flex w-full items-center">
-            <div className="text-title-xsm2 w-[12%] lg:block hidden">Tematik</div>
+            <div className="text-title-xsm2 w-[12%] lg:block hidden">
+              Tematik
+            </div>
             <div className="w-[3%] lg:block hidden">:</div>
             <div className="lg:w-[85%] w-full">
               <TextInput
@@ -98,7 +100,9 @@ const FormField = (props: OtherProps & FormikProps<FormValues>) => {
         </div>
         <div className="px-8 flex flex-col gap-2 space-y-4 py-6">
           <div className="relative flex w-full items-center">
-            <div className="text-title-xsm2 w-[12%] lg:block hidden">Keterangan</div>
+            <div className="text-title-xsm2 w-[12%] lg:block hidden">
+              Keterangan
+            </div>
             <div className="w-[3%] lg:block hidden">:</div>
             <div className="lg:w-[85%] w-full">
               <TextInput
@@ -120,7 +124,9 @@ const FormField = (props: OtherProps & FormikProps<FormValues>) => {
             className="flex gap-3 items-center justify-center"
             onClick={() => setOpenAddIndikator(true)}
           >
-            <div><IoIosAddCircle size={24} /></div>
+            <div>
+              <IoIosAddCircle size={24} />
+            </div>
             <div className="text-title-xsm2">Tambah Indikator</div>
           </button>
         </div>
@@ -266,35 +272,33 @@ const FormField = (props: OtherProps & FormikProps<FormValues>) => {
         values={values}
       />
     </div>
-  )
-}
+  );
+};
 
 function CreateForm({ handleSubmit, data, ...otherProps }: MyFormProps) {
   const FormWithFormik = withFormik({
     mapPropsToValues: () => ({
-      tematik: data.length != 0 ? data.tematik : '',
+      tematik: data.length != 0 ? data.tematik : "",
       indikator: data.length != 0 ? data.indikator : [],
       deletedIndikator: [],
-      keterangan: data.length != 0 ? data.keterangan : ''
+      keterangan: data.length != 0 ? data.keterangan : "",
     }),
     validationSchema: Yup.object().shape({
-      tematik: Yup.string()
-        .required("Tematik tidak boleh kosong !"),
+      tematik: Yup.string().required("Tematik tidak boleh kosong !"),
       indikator: Yup.array().of(
         Yup.object().shape({
-          indikator: Yup.string().required('Indikator is required'),
-          target: Yup.string().required('Target perhitungan is required'),
-          satuan: Yup.string().required('Satuan data is required'),
-          tahun: Yup.string().required('Tahun is required')
-        })
+          indikator: Yup.string().required("Indikator is required"),
+          target: Yup.string().required("Target perhitungan is required"),
+          satuan: Yup.string().required("Satuan data is required"),
+          tahun: Yup.string().required("Tahun is required"),
+        }),
       ),
-      keterangan: Yup.string()
-        .required("keterangan tidak boleh kosong !"),
+      keterangan: Yup.string().required("keterangan tidak boleh kosong !"),
     }),
-    handleSubmit
-  })(FormField)
+    handleSubmit,
+  })(FormField);
 
-  return <FormWithFormik {...otherProps} />
+  return <FormWithFormik {...otherProps} />;
 }
 
 const EditTematikForm: any = () => {
@@ -302,9 +306,12 @@ const EditTematikForm: any = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { storePayload } = useSelector((state: State) => ({
-    storePayload: state.payload.storePayload
-  }), shallowEqual);
+  const { storePayload } = useSelector(
+    (state: State) => ({
+      storePayload: state.payload.storePayload,
+    }),
+    shallowEqual,
+  );
 
   const handleSubmit = async (values: FormValues) => {
     setLoading(true);
@@ -315,16 +322,16 @@ const EditTematikForm: any = () => {
         keterangan: values.keterangan,
         tahun_id: storePayload.tahun_id,
         level: 0,
-        parent_id: ""
-      }
-    }
+        parent_id: "",
+      },
+    };
 
     const response = await fetchApi({
       url: `/api/v1/tematiks/${storePayload.id}`,
-      method: 'put',
-      type: 'auth',
-      body: payload
-    })
+      method: "patch",
+      type: "auth",
+      body: payload,
+    });
 
     if (response.status == 200) {
       Swal.fire({
@@ -350,11 +357,15 @@ const EditTematikForm: any = () => {
         text: "Koneksi bermasalah!",
       });
     }
-  }
+  };
 
   return (
-    <CreateForm handleSubmit={handleSubmit} loading={loading} data={storePayload} />
-  )
-}
+    <CreateForm
+      handleSubmit={handleSubmit}
+      loading={loading}
+      data={storePayload}
+    />
+  );
+};
 
 export default EditTematikForm;
