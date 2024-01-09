@@ -13,6 +13,15 @@ import { BiSolidAddToQueue } from 'react-icons/bi';
 import withAuth from '@/components/utils/withAuth';
 import Loading from '@/components/global/Loading/loading';
 import TextInput from '@/components/common/text-input/input';
+import Stack from '@mui/material/Stack';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
+
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref,
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const DataPohonKinerjaKota = dynamic(() => import('@/components/pages/rencana-kota/pohon-kinerja/list'), {
   ssr: false,
@@ -23,7 +32,6 @@ const PohonKinerjaKota = () => {
   const router = useRouter();
   const [dataPokinKota, setDataPokinKota] = useState<any>([]);
   const [dataTematik, setDataTematik] = useState<any>([]);
-  const [idTematik, setIdTematik] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
 
   const { storeKodeOPD, storeYear } = useSelector((state: State) => ({
@@ -33,28 +41,19 @@ const PohonKinerjaKota = () => {
 
   useEffect(() => {
     getTematik();
-    handleGetTematik();
-  }, [storeKodeOPD, storeYear, idTematik]);
+  }, [storeKodeOPD, storeYear]);
 
   const getTematik = async () => {
     setLoading(true);
     const response = await fetchApi({
-      url: `/tematik/getAllTematik/${storeYear.value}`,
+      url: `/api/v1/tematiks`,
       method: 'get',
       type: 'auth'
     })
 
-    if (!response.success) {
-      setLoading(false);
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Koneksi bermasalah!",
-      });
-    } else {
-      const { data } = response.data;
+    if (response.status == 200) {
       let temp: any = [];
-      data.forEach((el: any) => {
+      response.data.forEach((el: any) => {
         temp.push({
           label: el.tematik,
           value: el.id
@@ -62,26 +61,35 @@ const PohonKinerjaKota = () => {
       })
       setDataTematik(temp);
       setLoading(false);
-    }
-  }
-
-  const handleGetTematik = async () => {
-    const response = await fetchApi({
-      url: `/pokinKota/getPokinKota/${idTematik}`,
-      method: 'get',
-      type: 'auth'
-    })
-
-    if (!response.success) {
+    } else {
       setLoading(false);
       Swal.fire({
         icon: "error",
         title: "Oops...",
         text: "Koneksi bermasalah!",
       });
+    }
+  }
+
+  const handleGetTematik = async (id: number) => {
+    // setLoading(true);
+    const response = await fetchApi({
+      url: `/api/v1/tematiks/${id}`,
+      method: 'get',
+      type: 'auth'
+    })
+    console.log(response);
+
+    if (response.status == 200) {
+      setDataPokinKota(response.data);
+      setLoading(false);
     } else {
-      const { data } = response.data;
-      setDataPokinKota(data)
+      setLoading(false);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Koneksi bermasalah!",
+      });
     }
   }
 
@@ -94,34 +102,46 @@ const PohonKinerjaKota = () => {
     <div className='Pohon-kinerja-kota-container'>
       <Breadcrumb pageName="Pohon Kinerja Kota" />
 
-      <div className="bg-white dark:bg-meta-4 dark:text-white shadow-card flex flex-col gap-2 py-6 text-center font-bold text-title-sm rounded rounded-lg border-none">
-        <div>Pohon Kinerja Kota {storeYear.label}</div>
-      </div>
-      <div className='body relative'>
-        <div className='flex justify-between items-center mt-10'>
-          <div></div>
-          <div className='w-[40%]'>
-            <TextInput
-              type="dropdown"
-              id="tematik"
-              name="tematik"
-              label="Nama Tematik"
-              placeholder="Ketik dan Pilih Tematik"
-              options={dataTematik}
-              change={(selectedOption: any) => setIdTematik(selectedOption.value)}
-            />
-          </div>
-        </div>
-        <div style={gradientStyle} className='mt-4'>
-          <div className='px-4 flex text-white py-4 space-x-6 font-bold items-center'>
-            <PiTreeStructure size={20} />
-            <div className='text-title-xsm'>Pohon Kinerja Kota</div>
-          </div>
-        </div>
-        {dataPokinKota !== null && (
-          <DataPohonKinerjaKota data={dataPokinKota} handleGetTematik={handleGetTematik} />
-        )}
-      </div>
+      {loading ? (
+        <Loading loading={loading} setLoading={setLoading} />
+      ) : (
+        storeYear.length != 0 ? (
+          <>
+            <div className="bg-white dark:bg-meta-4 dark:text-white shadow-card flex flex-col gap-2 py-6 text-center font-bold text-title-sm rounded rounded-lg border-none">
+              <div>Pohon Kinerja Kota {storeYear.label}</div>
+            </div>
+            <div className='body relative'>
+              <div className='flex justify-between items-center mt-10'>
+                <div></div>
+                <div className='w-[40%]'>
+                  <TextInput
+                    type="dropdown"
+                    id="tematik"
+                    name="tematik"
+                    label="Nama Tematik"
+                    placeholder="Ketik dan Pilih Tematik"
+                    options={dataTematik}
+                    change={(selectedOption: any) => handleGetTematik(selectedOption.value)}
+                  />
+                </div>
+              </div>
+              <div style={gradientStyle} className='mt-4'>
+                <div className='px-4 flex text-white py-4 space-x-6 font-bold items-center'>
+                  <PiTreeStructure size={20} />
+                  <div className='text-title-xsm'>Pohon Kinerja Kota</div>
+                </div>
+              </div>
+              {dataPokinKota !== null && (
+                <DataPohonKinerjaKota data={dataPokinKota} handleGetTematik={handleGetTematik} />
+              )}
+            </div>
+          </>
+        ) : (
+          <Stack spacing={2} sx={{ width: '100%' }}>
+            <Alert severity="warning">Silakan Tahun terlebih dahulu !</Alert>
+          </Stack>
+        )
+      )}
     </div>
   )
 }

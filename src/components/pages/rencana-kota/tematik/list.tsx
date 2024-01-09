@@ -78,9 +78,8 @@ const DataTematikKota = ({ data, getTematik, setLoading }: PropTypes) => {
       method: 'delete',
       type: 'auth'
     })
-    console.log(response);
 
-    if (response.status == 200) {
+    if (response.status == 204) {
       Swal.fire({
         position: "center",
         icon: "success",

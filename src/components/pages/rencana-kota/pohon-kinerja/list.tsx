@@ -108,7 +108,7 @@ const DataPohonKinerjaKota = ({ data, handleGetTematik }: PropTypes) => {
                   </div>
                 </div>
                 <ul>
-                  {data.length != 0 && data?.sub_tematik?.
+                  {/* {data.length != 0 && data?.sub_tematik?.
                     sort((a: any, b: any) => a.id - b.id)?.
                     map((el: any, index: number) => (
                       <SubTematikProps
@@ -129,7 +129,7 @@ const DataPohonKinerjaKota = ({ data, handleGetTematik }: PropTypes) => {
                         />
                       </div>
                     </li>
-                  )}
+                  )} */}
                 </ul>
               </li>
             </ul>
